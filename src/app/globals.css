@@ -1,0 +1,445 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ */
+/* ATLAS — semantic token architecture                                  */
+/* Financial Clarity × Digital Luxury × Institutional Trust            */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --bg: #f4f7fb;
+  --bg-deep: #e9eff7;
+  --surface: #ffffff;
+  --surface-2: #eef3f9;
+  --surface-3: #e3ebf5;
+  --elevated: #ffffff;
+  --foreground: #0f1e35;
+  --muted: #5a6b83;
+  --subtle: #7d8ca1;
+  --border: #dbe4ef;
+  --border-strong: #c3d1e2;
+  --primary: #2246a8;
+  --primary-hover: #1a398d;
+  --primary-fg: #ffffff;
+  --primary-soft: #e7edfc;
+  --teal: #087e79;
+  --teal-soft: #e0f4f1;
+  --violet: #6b4fd0;
+  --violet-soft: #ede8fd;
+  --success: #137a58;
+  --success-soft: #e2f5ed;
+  --warning: #9a6108;
+  --warning-soft: #fdf2dd;
+  --danger: #b0233c;
+  --danger-soft: #fbe7ea;
+  --info: #2458b8;
+  --info-soft: #e8eefb;
+  --ring: #2246a8;
+  --shadow-color: 214 40% 30%;
+  --chart-1: #2246a8;
+  --chart-2: #087e79;
+  --chart-3: #6b4fd0;
+  --chart-4: #c2872f;
+  --chart-5: #3d7fa6;
+  --chart-6: #9a5a8a;
+  --chart-grid: #e3eaf3;
+  --card-sheen: rgba(255, 255, 255, 0.72);
+  --overlay: rgba(9, 19, 35, 0.42);
+  --radius-xs: 6px;
+  --radius-sm: 9px;
+  --radius-md: 13px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+}
+
+.dark {
+  --bg: #070e1a;
+  --bg-deep: #050a13;
+  --surface: #0f1a2b;
+  --surface-2: #152238;
+  --surface-3: #1b2b45;
+  --elevated: #132036;
+  --foreground: #edf4ff;
+  --muted: #9eb0c8;
+  --subtle: #7f92ab;
+  --border: #243651;
+  --border-strong: #354b6b;
+  --primary: #8fadff;
+  --primary-hover: #a9c0ff;
+  --primary-fg: #08111f;
+  --primary-soft: #1a2a4a;
+  --teal: #5fdccb;
+  --teal-soft: #10312f;
+  --violet: #bdaaff;
+  --violet-soft: #241d45;
+  --success: #4bd3a3;
+  --success-soft: #0e2c25;
+  --warning: #f0b45e;
+  --warning-soft: #33260f;
+  --danger: #ff8296;
+  --danger-soft: #351720;
+  --info: #8fb4ff;
+  --info-soft: #16264a;
+  --ring: #8fadff;
+  --shadow-color: 220 70% 3%;
+  --chart-1: #8fadff;
+  --chart-2: #5fdccb;
+  --chart-3: #bdaaff;
+  --chart-4: #e8b567;
+  --chart-5: #7fc4e8;
+  --chart-6: #d99bc8;
+  --chart-grid: #22334d;
+  --card-sheen: rgba(255, 255, 255, 0.08);
+  --overlay: rgba(2, 7, 15, 0.68);
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-background-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-elevated: var(--elevated);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-grid: var(--chart-grid);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+
+  --shadow-soft: 0 1px 2px hsl(var(--shadow-color) / 0.06),
+    0 8px 24px -12px hsl(var(--shadow-color) / 0.14);
+  --shadow-float: 0 2px 6px hsl(var(--shadow-color) / 0.08),
+    0 24px 60px -24px hsl(var(--shadow-color) / 0.28);
+  --shadow-inset: inset 0 1px 0 var(--card-sheen);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--foreground);
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+    border: 3px solid var(--bg);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  .amount {
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.03em;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  .mono {
+    font-family: var(--font-plex-mono), ui-monospace, monospace;
+    font-feature-settings: "zero" 1;
+  }
+
+  .eyebrow {
+    font-family: var(--font-plex-mono), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .hairline {
+    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  }
+
+  .surface-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .surface-inset {
+    background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+    border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+    border-radius: var(--radius-md);
+  }
+
+  .atlas-grid {
+    background-image: linear-gradient(
+        to right,
+        color-mix(in oklab, var(--border) 55%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--border) 55%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 78%);
+  }
+
+  .atlas-dots {
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--border-strong) 70%, transparent) 0.8px,
+      transparent 0.8px
+    );
+    background-size: 18px 18px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  }
+
+  .sheen {
+    background-image: linear-gradient(
+      115deg,
+      transparent 20%,
+      var(--card-sheen) 46%,
+      transparent 68%
+    );
+  }
+
+  .animate-rise {
+    animation: atlas-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: atlas-shimmer 1.8s linear infinite;
+  }
+
+  .animate-float {
+    animation: atlas-float 7s ease-in-out infinite;
+  }
+
+  .animate-pulse-ring {
+    animation: atlas-pulse-ring 2.4s ease-out infinite;
+  }
+
+  .animate-marquee {
+    animation: atlas-marquee 38s linear infinite;
+  }
+}
+
+@keyframes atlas-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes atlas-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes atlas-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.4deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(0.4deg);
+  }
+}
+
+@keyframes atlas-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--teal) 40%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes atlas-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes atlas-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes atlas-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes atlas-sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes atlas-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.atlas-overlay[data-state="open"] {
+  animation: atlas-overlay-in 180ms ease-out;
+}
+.atlas-dialog[data-state="open"] {
+  animation: atlas-dialog-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.atlas-sheet[data-state="open"] {
+  animation: atlas-sheet-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.atlas-popover[data-state="open"] {
+  animation: atlas-fade-up 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
