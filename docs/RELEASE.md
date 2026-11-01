@@ -11,7 +11,7 @@ ATLAS now covers four surfaces around one ledger:
 3. **Business** finance with organization roles, maker-checker approvals and developer keys.
 4. **Operations** with customers, support, risk, compliance, reconciliation, ledger, audit, integrations, health and permissions.
 
-The build compiles, the test suite passes, lint is clean and an authenticated production server was exercised across the main routes. Browser end-to-end, accessibility, visual-regression, performance and independent security testing remain outstanding.
+The build compiles, the test suite passes, lint is clean and an authenticated production server was exercised across the main routes. Chromium E2E covers login/logout, session revocation, workspace routes, card controls and payout failure. Remaining browser mutations, accessibility, visual-regression, performance and independent security testing remain outstanding.
 
 ## Batch history
 
@@ -59,7 +59,7 @@ The build compiles, the test suite passes, lint is clean and an authenticated pr
 | Command | Result | Notes |
 |---|---|---|
 | `npm run typecheck` | **PASS** | `tsc --noEmit`, no errors |
-| `npm test` | **PASS** | 41 tests across 4 files |
+| `npm test` | **PASS** | 57 tests across 6 files |
 | `npm run build` | **PASS** | Optimized production build; all routes compiled |
 | `npm run lint` | **PASS** | 0 errors, 0 warnings |
 
@@ -97,7 +97,7 @@ PASS indicates only the stated evidence, never commercial readiness.
 
 | Area | Status | Evidence / limit |
 |---|---|---|
-| Authentication | PARTIAL | Login, session, sign-out and API key checks exercised; no browser lifecycle or MFA test |
+| Authentication | PARTIAL | Unit and Chromium login/logout/session revocation checks; MFA not implemented |
 | Role enforcement | PASS | Unit, API and workflow tests for platform and business permissions; full page/action matrix not exhaustively exercised |
 | Account isolation | PASS | Customer account and API organization denial tests |
 | Ledger balancing | PASS | Seed per-currency balance and unbalanced-journal rejection tests |
@@ -126,7 +126,7 @@ Stop the server before copying files. `npm run db:reset` writes a timestamped `a
 
 ## Remaining issues
 
-- No browser E2E, accessibility, visual-regression or performance suite.
+- Partial Chromium E2E suite; no accessibility, visual-regression or performance suite.
 - No multiprocess concurrency or PostgreSQL isolation test.
 - Process-local rate limiting and sessions.
 - Synthetic providers, webhook deliveries and settlement only.

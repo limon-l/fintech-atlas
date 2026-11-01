@@ -14,6 +14,8 @@ Choose a persona at `/login`: `maya@atlas.demo` for personal finance, `jonas@atl
 
 Run `npm run typecheck`, `npm test`, and `npm run build`. Use `npm start` for the production server. On restricted PowerShell systems use `npm.cmd`. Builds currently fetch Google Fonts and require network access. Tests use isolated in-memory databases.
 
+For browser checks, run `npx playwright install chromium`, build the app, then run `npm run test:e2e`. Playwright starts a production server on port 3218 with a unique temporary SQLite database. It checks login/logout, revoked sessions, workspace routes, card freeze/limits and payout failure. Browser coverage is partial.
+
 ## Explore
 
 - Personal: accounts, transactions, transfers, FX, simulated cards, budgets, goals and bills.

@@ -24,7 +24,7 @@ This is the honest remaining-work list for the sandbox. Items marked **blocked**
 
 | Item | Why it matters | Current state |
 |---|---|---|
-| Browser E2E tests | Unit tests do not prove forms, navigation and toasts work together | Not implemented |
+| Browser E2E tests | Chromium covers login/logout, revoked sessions, workspace routes, card controls and payout failure | Partial; remaining mutations and other browsers pending |
 | Accessibility audit | Labels and focus styles exist; no axe/Lighthouse/screen-reader pass | Not tested |
 | Visual regression | Theme and responsive layouts have no screenshot baseline | Not implemented |
 | Performance measurement | No Core Web Vitals, bundle or database timing data | Not tested |

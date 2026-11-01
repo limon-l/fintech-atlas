@@ -239,8 +239,12 @@ export function AdjustmentForm({
 }
 
 export function SettlePayoutForm({ transferId, reference }: { transferId: string; reference: string }) {
-  const [state, action] = useActionState(settlePayoutAction, initial);
-  useOpsToast(state);
+  const [state, action] = useActionState(async (previous: OpsActionState, formData: FormData) => {
+    const result = await settlePayoutAction(previous, formData);
+    if (result.ok && result.message) toast.success(result.message);
+    if (result.error) toast.error(result.error);
+    return result;
+  }, initial);
   return (
     <form
       action={action}
@@ -274,8 +278,12 @@ export function SettlePayoutForm({ transferId, reference }: { transferId: string
 }
 
 export function FailPayoutForm({ transferId, reference }: { transferId: string; reference: string }) {
-  const [state, action] = useActionState(failPayoutAction, initial);
-  useOpsToast(state);
+  const [state, action] = useActionState(async (previous: OpsActionState, formData: FormData) => {
+    const result = await failPayoutAction(previous, formData);
+    if (result.ok && result.message) toast.success(result.message);
+    if (result.error) toast.error(result.error);
+    return result;
+  }, initial);
   return (
     <form action={action} className="mt-3 flex flex-wrap items-end gap-2" onSubmit={(event) => {
       if (!window.confirm(`Fail ${reference} and release its held funds?`)) event.preventDefault();

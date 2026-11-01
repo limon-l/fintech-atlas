@@ -137,7 +137,7 @@ An authenticated production server was exercised during development:
 - Unauthenticated operations routes redirected to sign-in.
 - The API returned structured `401` responses without a key.
 
-Browser E2E, accessibility, visual regression and performance checks are not implemented. See `docs/RELEASE.md` for the current quality matrix.
+Four Chromium E2E tests cover login/logout, session revocation, 31 workspace subroutes, card freeze/limits and payout failure. They use an isolated temporary database and the production server. Other mutations, accessibility, visual regression and performance checks remain outstanding. See `docs/RELEASE.md` for the current quality matrix.
 
 ## Security model
 
@@ -156,7 +156,7 @@ Browser E2E, accessibility, visual regression and performance checks are not imp
 - Process-local rate limiting.
 - Synthetic providers, provider events and webhook deliveries.
 - No real KYC, card issuing, payment network or FX liquidity.
-- No browser E2E, a11y audit, visual regression or performance measurement.
+- Partial Chromium E2E coverage; no a11y audit, visual regression or performance measurement.
 - No independent security review.
 - No production deployment, backup schedule or recovery drill.
 - The v1 API is read-only by design.
