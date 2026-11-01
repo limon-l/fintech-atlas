@@ -12,7 +12,6 @@ import {
 import { MarketingFooter, MarketingNav } from "@/components/marketing/chrome";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/misc";
 
 export const metadata = {
   title: "Security",

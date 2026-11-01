@@ -1,10 +1,10 @@
 import { Activity, Cable, Webhook } from "lucide-react";
 import { getDb } from "@/db/client";
 import { requireOps } from "@/lib/auth";
-import { listProviderEvents, listWebhooks } from "@/server/ops";
+import { listProcessingTransfers, listProviderEvents, listWebhooks } from "@/server/ops";
 import { PageHeader, SandboxNote, Panel, Stat, EmptyState, Disclosure } from "@/components/ui/misc";
 import { Badge, StatusPill } from "@/components/ui/badge";
-import { WebhookReplayButton } from "@/components/app/ops-forms";
+import { SettlePayoutForm, WebhookReplayButton } from "@/components/app/ops-forms";
 import { formatDateTime, relativeTime, safeJson } from "@/lib/utils";
 
 export const metadata = { title: "Integrations" };
@@ -14,6 +14,7 @@ export default async function OpsIntegrationsPage() {
   const db = getDb();
   const providerEvents = listProviderEvents(db);
   const webhooks = listWebhooks(db);
+  const processing = listProcessingTransfers(db);
   const failed = webhooks.filter((event) => String(event.status) === "failed").length;
   const delivered = webhooks.filter((event) => String(event.status) === "delivered").length;
 
@@ -57,6 +58,43 @@ export default async function OpsIntegrationsPage() {
                 <div className="text-left sm:text-right">
                   <p className="text-[11.5px] font-semibold">{Number(event.amount_minor).toLocaleString()} minor</p>
                   <p className="text-[9.5px] text-subtle">{String(event.currency)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      <Panel
+        title="Processing payouts"
+        description="Simulated provider settlements awaiting a signed callback"
+        action={<Badge variant={processing.length > 0 ? "warning" : "success"}>{processing.length} awaiting</Badge>}
+      >
+        {processing.length === 0 ? (
+          <EmptyState title="No processing payouts" description="Every external transfer has settled." />
+        ) : (
+          <div className="space-y-2">
+            {processing.map((transfer) => (
+              <div key={transfer.id} className="rounded-[10px] border border-border bg-surface px-3 py-2.5">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="mono text-[10.5px] font-semibold">{transfer.reference}</p>
+                      <StatusPill status="processing" />
+                      <Badge variant="outline">{transfer.source_currency}</Badge>
+                    </div>
+                    <p className="mt-0.5 text-[9.5px] text-subtle">
+                      {transfer.user_name} · {transfer.account_name} · created {relativeTime(transfer.created_at)}
+                      {transfer.provider_ref ? ` · ${transfer.provider_ref}` : ""}
+                    </p>
+                  </div>
+                  <p className="text-[11.5px] font-semibold">
+                    {Number(transfer.source_amount_minor).toLocaleString()} minor
+                    {transfer.fee_minor > 0 ? ` + ${Number(transfer.fee_minor).toLocaleString()} fee` : ""}
+                  </p>
+                </div>
+                <div className="mt-2 border-t border-border/70 pt-2">
+                  <SettlePayoutForm transferId={transfer.id} reference={transfer.reference} />
                 </div>
               </div>
             ))}

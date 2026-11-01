@@ -13,6 +13,7 @@ import {
   resolveReconciliationItem,
   reverseJournalByOps,
   runReconciliation,
+  settlePayoutByOps,
   updateComplianceCase,
   updateRiskEvent,
   updateSupportTicket,
@@ -179,6 +180,23 @@ describe("ledger controls", () => {
       }),
     ).toThrow(/available/i);
     expect(() => postAdjustment(db, admin, { accountId: "acc_maya_usd", amountMinor: 0, currency: "USD", reason: "zero" })).toThrow(/non-zero/i);
+  });
+});
+
+describe("payout settlement", () => {
+  it("requires ledger authority and settles a processing payout once", () => {
+    expect(() => settlePayoutByOps(db, support, "trf_maya_gbp_pending")).toThrow(/permission/i);
+    settlePayoutByOps(db, admin, "trf_maya_gbp_pending");
+    const transfer = db
+      .prepare("SELECT status, settled_at, journal_id FROM transfers WHERE id = 'trf_maya_gbp_pending'")
+      .get() as { status: string; settled_at: string | null; journal_id: string | null };
+    expect(transfer.status).toBe("posted");
+    expect(transfer.settled_at).not.toBeNull();
+    expect(transfer.journal_id).not.toBeNull();
+    expect(
+      db.prepare("SELECT status FROM holds WHERE transfer_id = 'trf_maya_gbp_pending'").get(),
+    ).toEqual({ status: "captured" });
+    expect(() => settlePayoutByOps(db, admin, "trf_maya_gbp_pending")).toThrow(/processing/i);
   });
 });
 

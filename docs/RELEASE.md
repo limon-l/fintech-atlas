@@ -1,34 +1,95 @@
-# Implementation evidence and release quality
+# Release QA report
 
-Date: 2026-10-31. Scope: preserve and extend the supplied repository. The complete master prompt is not delivered; this is a tested foundation and operations/developer batch.
+Date: 2026-11-01. Scope: the complete local sandbox currently in the repository. This report records what was executed and observed. It is not a production-readiness certification.
 
-## Batch: financial safety and working operations
+## Executive summary
 
-**Objective:** repair existing compilation; protect immutable financial records; supply regression tests; connect missing staff and developer routes.
+ATLAS now covers four surfaces around one ledger:
 
-**Files created:** `src/db/migrations/002_ledger_guards.sql`, `src/domain/finance.test.ts`, `src/server/api.ts`, `src/server/api.test.ts`, `src/app/api/v1/[...resource]/route.ts`, `src/app/actions/api-keys.ts`, `src/app/business/developers/page.tsx`, `src/app/ops/page.tsx`, `src/app/ops/[view]/page.tsx`, `src/components/app/api-key-form.tsx`, `src/components/app/ops-table.tsx`, and the three documents in `docs/`.
+1. **Public** marketing, pricing, security, developer documentation and rendered `/docs`.
+2. **Personal** banking for a multi-currency customer.
+3. **Business** finance with organization roles, maker-checker approvals and developer keys.
+4. **Operations** with customers, support, risk, compliance, reconciliation, ledger, audit, integrations, health and permissions.
 
-**Files modified:** `src/components/ui/misc.tsx`, `src/server/business.ts`, `src/domain/money.ts`, `src/domain/fx.ts`, `src/app/developers/page.tsx`, `.env.example`, `README.md`, and Next-generated TypeScript configuration updates in `tsconfig.json`.
+The build compiles, the test suite passes, lint is clean and an authenticated production server was exercised across the main routes. Browser end-to-end, accessibility, visual-regression, performance and independent security testing remain outstanding.
 
-**Frontend features:** operations overview; customer/support records; risk/compliance review forms; reconciliation action; ledger/audit/provider/health/permission views; developer key creation and revocation. Existing personal/business pages are retained, not newly claimed as implemented in this batch.
+## Batch history
 
-**Backend features:** validated staff actions; hashed-key read API; current-role and organization checks; process-local rate limiting; correlated JSON responses; bounded account/transaction pagination; key revocation and audit events.
+### Batch 1 — Foundation
 
-**Database changes:** migration 002 blocks appending postings to final journals, directly inserting final journals, and editing/deleting audit events. Existing databases migrate on access.
+- Next.js App Router, strict TypeScript, Tailwind v4, Radix primitives, Motion, TanStack Query, React Hook Form/Zod, Recharts, Lucide and `next-themes`.
+- Semantic token system, marketing pages, app shell and shared UI primitives.
+- SQLite schema, migration runner, deterministic seed and local client.
+- Money, FX, ledger, RBAC, identity and access domains.
+- scrypt password/PIN hashing, hashed opaque sessions, eight-hour expiry and process-local rate limits.
+- Personal and business services and routes.
 
-**Financial invariant checks:** balance per journal/currency; exact parsing and conversion; safe running totals; duplicate transfer protection; changed-payload conflict; insufficient-funds rollback; hold reserve/capture; duplicate settlement rejection; quote expiration; compensating reversal; immutable posting/audit records.
+### Batch 2 — Financial safety and read API
 
-**Security controls:** server-side staff permission guards; ownership checks; active hashed bearer keys; immediate revocation; no-store API responses; required review notes; immutable decision audit. No independent security review was performed.
+- `002_ledger_guards.sql` protects posted journals, postings and audit events.
+- Atomic idempotency, holds, settlement, FX quotes, reversals and reconciliation.
+- Read-only bearer API at `/api/v1/[...resource]`.
+- Hashed, owner-scoped, revocable and rate-limited API keys.
+- Regression tests for money, journals, idempotency, holds, FX and API boundaries.
 
-**Tests executed:** `npm.cmd test` (19 tests across two files); `npm.cmd run typecheck`; `npm.cmd run build`. API boundary tests cover missing keys, customer isolation, denied staff endpoints, denied organization access, oversized limits and revocation.
+### Batch 3 — Personal and business workspaces
 
-**Actual results:** 19/19 tests pass. TypeScript and optimized production build pass. The first sandbox build failed fetching Google Fonts; retry with approved network access succeeded. Build reports a dynamic database-path tracing warning. Vitest reports an advisory about future native config loading. No dependencies were added.
+- Dedicated personal routes: accounts, transactions, transfers, FX, cards, budgets, goals, bills, insights, beneficiaries, settings.
+- Dedicated business routes: invoices, bills, vendors, approvals, expenses, cards, team, reports, developers.
+- Organization switching and maker-checker approval decisions.
+- Server actions enforce permission and ownership.
 
-Production-server HTTP smoke checks: homepage 200; login 200; unauthenticated operations 307 redirect; unauthenticated accounts API 401 with structured error, request correlation ID and `Cache-Control: no-store`. The verification server was stopped afterward. These checks do not constitute browser or authenticated workflow QA.
+### Batch 4 — Operations console
 
-**Remaining issues:** no multiprocess concurrency test; no browser E2E/a11y/visual audit; no measured performance; broad synthetic staff visibility; process-local rate limiting; no production financial providers; no reliable external webhook worker; no PostgreSQL or deployment verification. Existing marketing links/content need a full route/claim audit. Developer keys use read-only HTTP endpoints; transfer submission remains a server-action UI workflow.
+- Replaced the generic `[view]` table with dedicated routes.
+- Added audited risk, compliance, support, reconciliation, ledger correction, settlement and webhook replay actions.
+- Sensitive actions require permission and, where financial or case-related, the authorization PIN.
 
-**Next batch:** fix reconciliation edge cases (including offsetting provider discrepancies), add concurrency and approval regression tests, perform authenticated browser walkthroughs, audit all links and marketing claims, then implement a durable provider/outbox boundary before expanding wealth or lending scope.
+### Batch 5 — Documentation and hardening
+
+- `/docs` and `/docs/[slug]` render repository markdown through `marked`.
+- Added architecture, ledger, RBAC, design system, implementation, backlog, QA and portfolio documents.
+- Added API key revocation UI.
+- Added operations settlement for processing payouts.
+- Added `db:reset` with a timestamped backup before rebuilding the local database.
+- Removed unused imports, dead files and stale actions; lint is clean.
+
+## Automated verification
+
+| Command | Result | Notes |
+|---|---|---|
+| `npm run typecheck` | **PASS** | `tsc --noEmit`, no errors |
+| `npm test` | **PASS** | 41 tests across 4 files |
+| `npm run build` | **PASS** | Optimized production build; all routes compiled |
+| `npm run lint` | **PASS** | 0 errors, 0 warnings |
+
+Known non-fatal advisories:
+
+- Turbopack reports a dynamic filesystem access warning in `src/db/migrate.ts` because the migration directory is read at runtime.
+- Vitest reports that `vitest.config.ts` is ESM loaded as CommonJS. Tests still pass.
+
+### Test files
+
+| File | Coverage |
+|---|---|
+| `src/domain/finance.test.ts` | Money precision, journal balance, idempotency replay/conflict, insufficient funds, holds, settlement, FX expiry, reversals, database guards, API key hashing, reconciliation authorization |
+| `src/server/api.test.ts` | HTTP authentication, ownership, staff denial, pagination validation, immediate revocation |
+| `src/server/ops.test.ts` | Operations permissions, risk/compliance/support decisions, reconciliation resolution, reversals, adjustments, webhook replay, payout settlement |
+| `src/server/workflows.test.ts` | FX conversion, external FX rejection, maker-checker role order, PIN/comment requirements, self-approval rejection, RBAC matrix |
+
+## Runtime smoke checks
+
+A production server was started with `npm start` and exercised with an authenticated admin session.
+
+- Public pages `/`, `/pricing`, `/security`, `/developers`, `/login` return `200`.
+- `/docs` and all nine documentation slugs render `200`.
+- Authenticated `/app`, `/business` and `/ops` routes return `200`.
+- All thirteen operations routes render, including journal and customer detail pages.
+- Unauthenticated operations routes redirect to sign-in.
+- The API returns structured `401` responses without a key.
+- Organization switching and sign-out were exercised through the server actions.
+
+These are HTTP and server-action checks, not a full browser workflow test. No screenshots, accessibility scores or performance traces were collected.
 
 ## Release quality matrix
 
@@ -36,8 +97,8 @@ PASS indicates only the stated evidence, never commercial readiness.
 
 | Area | Status | Evidence / limit |
 |---|---|---|
-| Authentication | NOT TESTED | API key checks tested; full browser session lifecycle not tested |
-| Role enforcement | PASS | Unit and API tests for denied staff and business permissions; full matrix not exhaustively exercised |
+| Authentication | PARTIAL | Login, session, sign-out and API key checks exercised; no browser lifecycle or MFA test |
+| Role enforcement | PASS | Unit, API and workflow tests for platform and business permissions; full page/action matrix not exhaustively exercised |
 | Account isolation | PASS | Customer account and API organization denial tests |
 | Ledger balancing | PASS | Seed per-currency balance and unbalanced-journal rejection tests |
 | Transfer idempotency | PASS | Same request replay, changed request conflict, one debit |
@@ -45,19 +106,34 @@ PASS indicates only the stated evidence, never commercial readiness.
 | Financial transaction states | PASS | Processing hold, settlement, repeated settlement and reversal tests; all states not exhaustive |
 | FX calculations | PASS | Currency precision, deterministic conversion and expired quote tests |
 | Payment integrations | BLOCKED | No live provider configured or authorized |
-| Customer dashboard | NOT TESTED | Compiles; authenticated visual and interaction QA pending |
-| Business operations | NOT TESTED | Existing routes compile; complete approval/payout tests pending |
-| Risk/compliance workflows | NOT TESTED | New guarded forms compile; browser mutation tests pending |
-| Reconciliation | PASS | Unauthorized caller rejected and authorized run persists; edge cases pending |
+| Customer workspace | PARTIAL | Routes compile and render; browser interaction QA pending |
+| Business operations | PARTIAL | Routes compile and render; maker-checker tested; full browser workflow pending |
+| Risk/compliance workflows | PARTIAL | Guarded forms and service decisions tested; browser mutation tests pending |
+| Reconciliation | PASS | Unauthorized caller rejected, authorized run persists, item resolution tested; offsetting discrepancies partial |
+| Payout settlement | PASS | Operations settlement posts, captures the hold and rejects repeats |
 | Responsive design | NOT TESTED | Responsive styles exist; no device/browser inspection |
-| Accessibility | NOT TESTED | Labels and semantic tables added; audit pending |
-| Dark mode | NOT TESTED | Existing semantic themes preserved; visual audit pending |
-| Automated tests | PASS | 19 tests in 2 suites |
+| Accessibility | NOT TESTED | Labels, focus styles and semantic tables exist; axe/Lighthouse/screen-reader audit pending |
+| Dark mode | NOT TESTED | Semantic themes exist; visual audit pending |
+| Automated tests | PASS | 41 tests in 4 suites |
 | Performance | NOT TESTED | No Core Web Vitals, bundle or load measurements |
 | Security review | NOT TESTED | No independent audit or penetration test |
-| Deployment readiness | BLOCKED | Local build succeeds; persistent hosting, secrets, recovery and release gates incomplete |
-| Documentation | PASS | Architecture, design, roles, ledger, roadmap, evidence and walkthrough recorded |
+| Deployment readiness | BLOCKED | Local build succeeds; hosting, secrets, recovery and release gates incomplete |
+| Documentation | PASS | Architecture, ledger, RBAC, design, blueprint, implementation, backlog, QA and portfolio recorded |
 
 ## Local recovery
 
-Stop the server before backup. Copy the database and any WAL/SHM companions together, or use SQLite's backup API for a consistent online snapshot. Test recovery on a separate path through `DATABASE_PATH`; verify migrations and journal balance before reuse. Do not manually edit posted financial rows. `resetDb()` closes/reopens a connection; it is not a destructive data reset. Do not advertise the package's `db:reset` script as functional: its referenced source file is absent from the supplied repository.
+Stop the server before copying files. `npm run db:reset` writes a timestamped `atlas.backup-*.db` beside the live database before deleting and rebuilding it. To restore, stop the server, move the backup into place, then start again. Do not manually edit posted financial rows; use the operations reversal workflow. Test recovery on a separate path through `DATABASE_PATH` and confirm migrations and journal balance before reuse.
+
+## Remaining issues
+
+- No browser E2E, accessibility, visual-regression or performance suite.
+- No multiprocess concurrency or PostgreSQL isolation test.
+- Process-local rate limiting and sessions.
+- Synthetic providers, webhook deliveries and settlement only.
+- No MFA/passkeys, CSP, managed secrets or independent security review.
+- Broad synthetic staff customer visibility by design; production needs field-level redaction.
+- The v1 API is read-only; external webhook delivery and API writes are not implemented.
+
+## Release gate
+
+Do not describe ATLAS as production-ready, compliant or safe for real money. Close the P0 items in `docs/BACKLOG.md`, record browser and accessibility evidence, and complete an independent review of authorization and money-movement boundaries first.

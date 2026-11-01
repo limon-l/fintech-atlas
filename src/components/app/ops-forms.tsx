@@ -11,6 +11,7 @@ import {
   reviewComplianceAction,
   reviewRiskAction,
   runReconciliationAction,
+  settlePayoutAction,
   updateSupportTicketAction,
   type OpsActionState,
 } from "@/app/actions/ops";
@@ -232,6 +233,41 @@ export function AdjustmentForm({
       <SubmitButton size="sm" variant="secondary" pendingLabel="Posting adjustment…">
         Post controlled adjustment
       </SubmitButton>
+    </form>
+  );
+}
+
+export function SettlePayoutForm({ transferId, reference }: { transferId: string; reference: string }) {
+  const [state, action] = useActionState(settlePayoutAction, initial);
+  useOpsToast(state);
+  return (
+    <form
+      action={action}
+      className="flex flex-wrap items-end gap-2"
+      onSubmit={(event) => {
+        if (!window.confirm(`Post the simulated settlement for ${reference}? This moves the held funds.`)) {
+          event.preventDefault();
+        }
+      }}
+    >
+      <input type="hidden" name="transferId" value={transferId} />
+      <Field label="Authorization PIN" htmlFor={`settle-pin-${transferId}`} hint="Demo PIN: 246810">
+        <Input
+          id={`settle-pin-${transferId}`}
+          name="pin"
+          type="password"
+          inputMode="numeric"
+          autoComplete="off"
+          required
+          className="w-36"
+        />
+      </Field>
+      <SubmitButton size="sm" variant="secondary" pendingLabel="Settling…">
+        Settle payout
+      </SubmitButton>
+      <div className="w-full">
+        <FormError message={state.error} />
+      </div>
     </form>
   );
 }

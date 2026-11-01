@@ -4,9 +4,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   BookOpenCheck,
-  Copy,
   Globe2,
-  Landmark,
   Send,
   ShieldCheck,
   Wallet,
@@ -16,7 +14,7 @@ import { requireUser } from "@/lib/auth";
 import { listAccounts, listTransactions } from "@/server/finance";
 import { PageHeader, Panel, SandboxNote, Disclosure, KeyValue, EmptyState, Stat } from "@/components/ui/misc";
 import { Money } from "@/components/ui/money";
-import { Badge, StatusPill } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TransactionRow } from "@/components/app/finance-bits";
 import { BalanceCheck, PostingsTable, type PostingView } from "@/components/app/ledger-bits";

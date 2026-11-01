@@ -11,6 +11,7 @@ import {
   resolveReconciliationItem,
   reverseJournalByOps,
   runReconciliation,
+  settlePayoutByOps,
   updateComplianceCase,
   updateRiskEvent,
   updateSupportTicket,
@@ -206,6 +207,26 @@ export async function postAdjustmentAction(
     });
     revalidateOps("/ops/ledger", "/ops/audit", "/ops/health");
     return { ok: true, message: "Controlled adjustment posted as a new journal." };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Payout settlement                                                          */
+/* -------------------------------------------------------------------------- */
+
+export async function settlePayoutAction(
+  _previous: OpsActionState,
+  formData: FormData,
+): Promise<OpsActionState> {
+  try {
+    const actor = await requireOps("ops:ledger");
+    const pinError = await authorizePin(actor.id, text(formData, "pin"));
+    if (pinError) return { error: pinError };
+    settlePayoutByOps(getDb(), actor, text(formData, "transferId"));
+    revalidateOps("/ops/integrations", "/ops/ledger", "/ops/audit");
+    return { ok: true, message: "Simulated settlement posted and the hold was captured." };
   } catch (error) {
     return failure(error);
   }

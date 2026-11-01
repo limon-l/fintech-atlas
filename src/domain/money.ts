@@ -76,8 +76,6 @@ export class MoneyError extends Error {
   }
 }
 
-const MAX_SAFE_MINOR = Number.MAX_SAFE_INTEGER;
-
 export function assertSafeMinor(value: number, context = "amount"): void {
   if (!Number.isSafeInteger(value)) {
     throw new MoneyError(`${context} must be a safe integer number of minor units`);

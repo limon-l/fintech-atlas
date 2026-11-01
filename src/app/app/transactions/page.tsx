@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { ArrowDownLeft, ArrowUpRight, Download, Filter, Search } from "lucide-react";
+import { Download, Filter, Search } from "lucide-react";
 import { getDb } from "@/db/client";
 import { requireUser } from "@/lib/auth";
 import { listAccounts, listTransactions, type TransactionFilters } from "@/server/finance";
 import { PageHeader, Panel, SandboxNote, EmptyState, Disclosure } from "@/components/ui/misc";
 import { Money } from "@/components/ui/money";
-import { Badge, StatusPill } from "@/components/ui/badge";
+import { StatusPill } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/form";
 import { CategoryIcon, TransactionDateGroup } from "@/components/app/finance-bits";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Transactions" };
 

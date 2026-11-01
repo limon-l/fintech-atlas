@@ -111,13 +111,13 @@ export default function DevelopersPage() {
             <h2 className="text-[16px] font-semibold">Authentication</h2>
             <p className="mt-2 text-[12px] leading-relaxed text-muted">
               Send the key as a bearer token. Keys are scoped to the user who created them and to
-              the organizations they belong to. The demo key is documented in the business
-              developer portal and is intentionally sandbox-only.
+              the organizations they belong to. Create a key from the business developer portal
+              while signed in as an organization owner or finance manager.
             </p>
             <pre className="mono mt-4 overflow-x-auto rounded-[9px] border border-border bg-surface-2 p-3 text-[10.5px] text-muted">
-{`Authorization: Bearer atlas_sk_sandbox_demo_7f3c9a2e5b814d06`}
+{`Authorization: Bearer atlas_sk_sandbox_...`}
             </pre>
-            <p className="mt-2 text-[10.5px] text-subtle">Demo key is read-only and synthetic.</p>
+            <p className="mt-2 text-[10.5px] text-subtle">Keys are read-only and sandbox-only.</p>
           </section>
 
           <section className="surface-card p-6">

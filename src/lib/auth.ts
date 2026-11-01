@@ -113,7 +113,7 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
 }
 
 export async function requireBusiness(permission?: Permission): Promise<BusinessContext> {
-  const user = await requireUser("/business");
+  await requireUser("/business");
   const ctx = await getBusinessContext();
   if (!ctx) redirect("/app?denied=business");
   if (permission && !canBusiness(ctx.role, permission)) {

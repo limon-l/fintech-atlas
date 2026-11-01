@@ -18,7 +18,7 @@ import {
   User,
 } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { signOutAction } from "@/app/actions/auth";
+import { signOutAction, switchOrgAction } from "@/app/actions/auth";
 import { markAllNotificationsReadAction } from "@/app/actions/personal";
 import { Avatar } from "@/components/ui/misc";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -302,12 +302,16 @@ function UserMenu({
           <>
             <DropdownLabel>Organization</DropdownLabel>
             {orgs.map((org) => (
-              <DropdownItem key={org.id} asChild>
-                <Link href="/business" className="justify-between">
+              <form key={org.id} action={switchOrgAction}>
+                <input type="hidden" name="orgId" value={org.id} />
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-between gap-2 rounded-[7px] px-2.5 py-2 text-left text-[12.5px] font-medium text-foreground outline-none transition-colors hover:bg-surface-2 focus-visible:bg-surface-2"
+                >
                   <span className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5" /> {org.name}</span>
                   {org.id === activeOrgId ? <Check className="h-3.5 w-3.5 text-teal" /> : null}
-                </Link>
-              </DropdownItem>
+                </button>
+              </form>
             ))}
             <DropdownSeparator />
           </>

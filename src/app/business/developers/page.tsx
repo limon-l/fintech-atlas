@@ -5,7 +5,7 @@ import { listApiKeys, listWebhooks } from "@/server/ops";
 import { PageHeader, SandboxNote, Panel, EmptyState, Disclosure, KeyValue } from "@/components/ui/misc";
 import { Badge, StatusPill } from "@/components/ui/badge";
 import { CopyButton } from "@/components/ui/copy-button";
-import { ApiKeyForm } from "@/components/app/api-key-form";
+import { ApiKeyForm, RevokeKeyButton } from "@/components/app/api-key-form";
 import { formatDateTime, safeJson } from "@/lib/utils";
 
 export const metadata = { title: "Developers" };
@@ -50,6 +50,7 @@ export default async function BusinessDevelopersPage() {
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{key.environment}</Badge>
                       {key.revoked_at ? <StatusPill status="canceled" /> : <StatusPill status="active" />}
+                      {key.revoked_at ? null : <RevokeKeyButton keyId={key.id} name={key.name} />}
                     </div>
                   </div>
                   <p className="mt-1 text-[9px] text-subtle">
@@ -75,7 +76,7 @@ export default async function BusinessDevelopersPage() {
             <KeyValue label="Base URL" value={<span className="mono text-[10.5px]">/api/v1</span>} />
             <KeyValue label="Auth" value={<span className="mono text-[10.5px]">Bearer &lt;key&gt;</span>} />
             <KeyValue label="Format" value={<span className="mono text-[10.5px]">application/json</span>} />
-            <KeyValue label="Rate limit" value="60 req / minute / key" />
+            <KeyValue label="Rate limit" value="120 req / minute / key" />
           </dl>
         </Panel>
       </section>

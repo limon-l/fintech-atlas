@@ -3,7 +3,6 @@
 import { useActionState, useState } from "react";
 import { ArrowRight, KeyRound, Lock, Mail, Sparkles } from "lucide-react";
 import { signInAction, type AuthState } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { DEMO_PASSWORD } from "@/lib/demo";

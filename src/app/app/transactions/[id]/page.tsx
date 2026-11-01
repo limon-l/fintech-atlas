@@ -6,8 +6,6 @@ import {
   BookOpenCheck,
   CreditCard,
   Download,
-  ExternalLink,
-  Send,
   ShieldCheck,
   Tag,
 } from "lucide-react";

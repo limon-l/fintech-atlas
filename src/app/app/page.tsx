@@ -6,29 +6,26 @@ import {
   CreditCard,
   Globe2,
   PieChart,
-  Plus,
   Send,
   Sparkles,
   Target,
   TrendingUp,
-  Wallet,
 } from "lucide-react";
 import { getDb } from "@/db/client";
 import { requireUser } from "@/lib/auth";
 import { getPersonalDashboard } from "@/server/finance";
 import { PageHeader, Stat, SandboxNote, EmptyState, ProgressBar, Panel, Disclosure } from "@/components/ui/misc";
-import { Money, MoneyDelta } from "@/components/ui/money";
+import { Money } from "@/components/ui/money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CashflowChart, SpendDonut } from "@/components/ui/charts";
-import { AccountTile, TransactionRow, CategoryIcon } from "@/components/app/finance-bits";
-import { formatDate, relativeTime } from "@/lib/utils";
+import { TransactionRow, CategoryIcon } from "@/components/app/finance-bits";
+import { formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const user = await requireUser("/app");
   const db = getDb();
   const dashboard = getPersonalDashboard(db, user.id);
-  const primary = dashboard.portfolio.accounts.find((account) => account.isPrimary) ?? dashboard.portfolio.accounts[0];
   const hour = new Date().getUTCHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const firstName = user.name.split(" ")[0];

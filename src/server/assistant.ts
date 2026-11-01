@@ -1,7 +1,7 @@
 import type Database from "better-sqlite3";
 import type { SessionUser } from "@/domain/identity";
 import { formatMoney } from "@/domain/money";
-import { getPersonalDashboard, getBudget, getGoals, getRecurring, monthBounds, listTransactions } from "./finance";
+import { getPersonalDashboard, getBudget, getGoals, getRecurring, listTransactions } from "./finance";
 import { listTransfers, getTransferDetail } from "./transfers";
 import { monthKey } from "@/lib/utils";
 
@@ -234,8 +234,6 @@ export function askAtlas(db: Database.Database, user: SessionUser, question: str
     };
   }
 
-  const month = monthKey();
-  const { start, end } = monthBounds(month);
   const spend = dashboard.categories.reduce((acc, category) => acc + category.amountMinor, 0);
   return {
     intent: "overview",

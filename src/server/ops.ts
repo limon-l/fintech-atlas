@@ -5,6 +5,7 @@ import { canPlatform, type Permission } from "@/domain/rbac";
 import { accountBalance, postJournal, recordAudit, reverseJournal, writeTransaction } from "@/domain/ledger";
 import { newId, reference } from "@/lib/utils";
 import { randomToken, sha256 } from "@/lib/password";
+import { settleTransfer } from "./transfers";
 
 function assertOps(user: SessionUser, permission: Permission): void {
   if (!canPlatform(user.platformRole, permission)) {
@@ -720,6 +721,39 @@ export function listProviderEvents(db: Database.Database) {
        LEFT JOIN transfers t ON t.id = pe.transfer_id ORDER BY pe.created_at DESC LIMIT 50`,
     )
     .all() as Array<Record<string, unknown>>;
+}
+
+export function listProcessingTransfers(db: Database.Database) {
+  return db
+    .prepare(
+      `SELECT t.id, t.reference, t.source_amount_minor, t.source_currency, t.fee_minor,
+              t.provider_ref, t.created_at, u.name AS user_name, a.name AS account_name
+       FROM transfers t
+       JOIN users u ON u.id = t.user_id
+       JOIN accounts a ON a.id = t.source_account_id
+       WHERE t.status = 'processing'
+       ORDER BY t.created_at ASC`,
+    )
+    .all() as Array<{
+    id: string;
+    reference: string;
+    source_amount_minor: number;
+    source_currency: string;
+    fee_minor: number;
+    provider_ref: string | null;
+    created_at: string;
+    user_name: string;
+    account_name: string;
+  }>;
+}
+
+export function settlePayoutByOps(
+  db: Database.Database,
+  actor: SessionUser,
+  transferId: string,
+): void {
+  assertOps(actor, "ops:ledger");
+  settleTransfer(db, transferId, actor);
 }
 
 export function listWebhooks(db: Database.Database) {

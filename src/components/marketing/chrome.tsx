@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/security", label: "Security" },
   { href: "/developers", label: "Developers" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export function MarketingNav() {

@@ -297,7 +297,7 @@ function seedAll(db: Database.Database): void {
     openingMinor: 8_420_000,
     openedAt: daysAgo(420),
   });
-  const northwindEur = createAccount({
+  createAccount({
     id: "acc_northwind_eur",
     ownerType: "org",
     ownerId: "org_northwind",

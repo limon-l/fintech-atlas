@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, BookOpenCheck, CreditCard, Globe2, Landmark, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowUpRight, BookOpenCheck, CreditCard, Globe2, Landmark, ShieldCheck, Wallet } from "lucide-react";
 import { getDb } from "@/db/client";
 import { requireUser } from "@/lib/auth";
 import { getCards, getPortfolio } from "@/server/finance";

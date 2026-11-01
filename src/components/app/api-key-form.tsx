@@ -1,9 +1,13 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { KeyRound, Plus, ShieldAlert } from "lucide-react";
+import { KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { createApiKeyAction, type DeveloperActionState } from "@/app/actions/developers";
+import {
+  createApiKeyAction,
+  revokeApiKeyAction,
+  type DeveloperActionState,
+} from "@/app/actions/developers";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -54,5 +58,30 @@ export function ApiKeyForm() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+export function RevokeKeyButton({ keyId, name }: { keyId: string; name: string }) {
+  const [state, action] = useActionState(revokeApiKeyAction, initial);
+
+  useEffect(() => {
+    if (state.message) toast.success(state.message);
+    if (state.error) toast.error(state.error);
+  }, [state]);
+
+  return (
+    <form
+      action={action}
+      onSubmit={(event) => {
+        if (!window.confirm(`Revoke “${name}”? Requests using this key will fail immediately.`)) {
+          event.preventDefault();
+        }
+      }}
+    >
+      <input type="hidden" name="id" value={keyId} />
+      <Button type="submit" variant="ghost" size="sm" className="text-danger hover:bg-danger-soft">
+        <Trash2 className="h-3.5 w-3.5" /> Revoke
+      </Button>
+    </form>
   );
 }
