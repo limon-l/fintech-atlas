@@ -9,11 +9,12 @@ export function SubmitButton({
   children,
   pendingLabel,
   className,
+  disabled,
   ...props
 }: ButtonProps & { pendingLabel?: string }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className={cn(className)} {...props}>
+    <Button {...props} type="submit" disabled={pending || disabled} aria-busy={pending} className={cn(className)}>
       {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
       {pending ? pendingLabel ?? "Working…" : children}
     </Button>

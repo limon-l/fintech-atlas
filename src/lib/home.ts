@@ -8,6 +8,6 @@ export function homeFor(user: SessionUser): string {
 
 export function safeNext(value: FormDataEntryValue | null): string | null {
   if (typeof value !== "string") return null;
-  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (!value.startsWith("/") || value.startsWith("//") || /[\\\u0000-\u0020\u007f]/.test(value)) return null;
   return value;
 }

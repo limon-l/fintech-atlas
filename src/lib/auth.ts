@@ -219,6 +219,7 @@ export async function signOut(): Promise<void> {
     );
   }
   store.delete(SESSION_COOKIE);
+  store.delete(ORG_COOKIE);
 }
 
 export async function setActiveOrg(orgId: string): Promise<void> {

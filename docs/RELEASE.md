@@ -114,7 +114,7 @@ PASS indicates only the stated evidence, never commercial readiness.
 | Responsive design | NOT TESTED | Responsive styles exist; no device/browser inspection |
 | Accessibility | NOT TESTED | Labels, focus styles and semantic tables exist; axe/Lighthouse/screen-reader audit pending |
 | Dark mode | NOT TESTED | Semantic themes exist; visual audit pending |
-| Automated tests | PASS | 41 tests in 4 suites |
+| Automated tests | PASS | 57 tests in 6 suites, including authentication lifecycle and payout failure |
 | Performance | NOT TESTED | No Core Web Vitals, bundle or load measurements |
 | Security review | NOT TESTED | No independent audit or penetration test |
 | Deployment readiness | BLOCKED | Local build succeeds; hosting, secrets, recovery and release gates incomplete |

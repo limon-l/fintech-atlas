@@ -101,7 +101,7 @@ Sensitive actions require the appropriate permission and, for financial or case 
 
 ```text
 npm run typecheck   pass
-npm test            41 tests across 4 files, all pass
+npm test            57 tests across 6 files, all pass
 npm run build       pass
 npm run lint        pass with 0 errors and 0 warnings
 ```
@@ -114,6 +114,14 @@ Test files:
 | `src/server/api.test.ts` | HTTP authentication, ownership, staff denial, pagination validation and immediate revocation |
 | `src/server/ops.test.ts` | Operations permissions, risk/compliance/support decisions, reconciliation resolution, reversals, adjustments, webhook replay, payout settlement |
 | `src/server/workflows.test.ts` | Successful FX conversion, external FX rejection, maker-checker role order, PIN/comment requirements, self-approval rejection and the RBAC matrix |
+| `src/lib/auth.test.ts` | Login normalization, session hashing, logout revocation, expiry, suspended users and PIN rate limits |
+| `src/lib/home.test.ts` | Safe local return paths and rejection of external, backslash and control-character redirects |
+
+### Follow-up verification
+
+- Operations can fail a processing payout with a PIN and a 5–500 character reason. The hold is released, the failure is audited, and customer notifications are persisted. Regression tests reject unauthorized calls and repeated state transitions and confirm the ledger balance remains unchanged.
+- Logout clears both session and organization cookies. Shared submit buttons preserve the disabled state while a form is pending, including when callers supply a disabled prop.
+- Production HTTP smoke checks pass for seven public pages, three protected workspace redirects and an unauthenticated API request (401). These checks do not exercise browser clicks or form submissions.
 
 Known non-fatal advisories:
 
