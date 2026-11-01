@@ -54,6 +54,30 @@ test("personal pages render and card freeze controls persist", async ({ page }) 
   await expect(page.getByLabel("Per txn USD", { exact: true })).toHaveValue("250.00");
 });
 
+test("account details show metadata for every owned account and reject other accounts", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await login(page);
+  for (const [id, name, country] of [
+    ["acc_maya_usd", "Everyday USD", "US"],
+    ["acc_maya_eur", "Euro travel", "IE"],
+    ["acc_maya_gbp", "London GBP", "GB"],
+    ["acc_maya_savings", "Reserve savings", "US"],
+    ["acc_maya_kyoto", "Kyoto 2027", "US"],
+  ]) {
+    const response = await page.goto(`/app/accounts/${id}`);
+    expect(response?.status(), id).toBe(200);
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+    const details = page.locator("dl").filter({ hasText: "Account number" });
+    await expect(details.locator("div").filter({ has: page.locator("dt", { hasText: /^Country$/ }) }).locator("dd")).toHaveText(country);
+    await expect(details.locator("div").filter({ has: page.locator("dt", { hasText: /^Opened$/ }) }).locator("dd")).not.toHaveText(/Invalid|^$/);
+  }
+  expect(errors).toEqual([]);
+  for (const id of ["acc_alex_usd", "acc_missing"]) {
+    expect((await page.goto(`/app/accounts/${id}`))?.status()).toBe(404);
+  }
+});
+
 test("business workspace pages render for the business owner", async ({ page }) => {
   await login(page, "jonas@atlas.demo", "/business");
   for (const route of ["invoices", "bills", "vendors", "approvals", "expenses", "cards", "team", "reports", "developers"]) {

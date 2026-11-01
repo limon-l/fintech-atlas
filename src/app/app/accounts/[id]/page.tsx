@@ -30,8 +30,8 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
   if (!account) notFound();
 
   const meta = db
-    .prepare("SELECT iban, bic, country, opened_at FROM accounts WHERE id = ?")
-    .get(id) as { iban: string | null; bic: string | null; country: string; opened_at: string };
+    .prepare("SELECT created_at FROM accounts WHERE id = ?")
+    .get(id) as { created_at: string };
   const transactions = listTransactions(db, "user", user.id, { accountId: id, limit: 25 }).rows;
   const ledgerRows = db
     .prepare(
@@ -127,10 +127,10 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
 
           <dl className="mt-5 grid gap-x-6 sm:grid-cols-2">
             <KeyValue label="Account number" value={<span className="mono">{account.masked ?? "—"}</span>} />
-            <KeyValue label="IBAN" value={<span className="mono">{meta.iban ?? "Not issued"}</span>} />
-            <KeyValue label="BIC" value={<span className="mono">{meta.bic ?? "ATLASGB2X"}</span>} />
-            <KeyValue label="Country" value={meta.country} />
-            <KeyValue label="Opened" value={formatDate(meta.opened_at)} />
+            <KeyValue label="IBAN" value={<span className="mono">{account.iban ?? "Not issued"}</span>} />
+            <KeyValue label="BIC" value={<span className="mono">Not issued</span>} />
+            <KeyValue label="Country" value={account.country} />
+            <KeyValue label="Opened" value={formatDate(meta.created_at)} />
             <KeyValue label="Ledger account" value={<span className="mono">led_{account.id}</span>} />
           </dl>
         </div>

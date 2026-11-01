@@ -137,7 +137,7 @@ An authenticated production server was exercised during development:
 - Unauthenticated operations routes redirected to sign-in.
 - The API returned structured `401` responses without a key.
 
-Four Chromium E2E tests cover login/logout, session revocation, 31 workspace subroutes, card freeze/limits and payout failure. They use an isolated temporary database and the production server. Other mutations, accessibility, visual regression and performance checks remain outstanding. See `docs/RELEASE.md` for the current quality matrix.
+Five Chromium E2E tests cover login/logout, session revocation, 31 workspace subroutes, all five personal account detail pages, account ownership checks, card freeze/limits and payout failure. They use an isolated temporary database and the production server. Other mutations, accessibility, visual regression and performance checks remain outstanding. See `docs/RELEASE.md` for the current quality matrix.
 
 ## Security model
 
