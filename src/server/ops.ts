@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 import { DomainError } from "@/domain/errors";
 import type { SessionUser } from "@/domain/identity";
 import { canPlatform, type Permission } from "@/domain/rbac";
-import { postJournal, recordAudit, reverseJournal, writeTransaction } from "@/domain/ledger";
+import { accountBalance, postJournal, recordAudit, reverseJournal, writeTransaction } from "@/domain/ledger";
 import { newId, reference } from "@/lib/utils";
 import { randomToken, sha256 } from "@/lib/password";
 
@@ -120,15 +120,28 @@ export function getCustomer360(db: Database.Database, userId: string) {
     )
     .get(userId) as Record<string, unknown> | undefined;
   if (!user) return null;
-  const accounts = db
-    .prepare(
-      `SELECT a.id, a.name, a.currency, a.status, a.owner_type,
-              (SELECT COALESCE(SUM(p.amount_minor), 0) FROM postings p
-                JOIN ledger_accounts la ON la.id = p.ledger_account_id
-                WHERE la.account_id = a.id) AS ledger_signed
-       FROM accounts a WHERE a.owner_type = 'user' AND a.owner_id = ?`,
-    )
-    .all(userId) as Array<Record<string, unknown>>;
+  const accounts = (
+    db
+      .prepare(
+        `SELECT a.id, a.name, a.currency, a.status, a.owner_type,
+                (SELECT COALESCE(SUM(p.amount_minor), 0) FROM postings p
+                  JOIN ledger_accounts la ON la.id = p.ledger_account_id
+                  WHERE la.account_id = a.id) AS ledger_signed
+         FROM accounts a WHERE a.owner_type = 'user' AND a.owner_id = ?`,
+      )
+      .all(userId) as Array<Record<string, unknown>>
+  ).map((account) => {
+    let ledgerMinor = -Number(account.ledger_signed ?? 0);
+    let heldMinor = 0;
+    try {
+      const balance = accountBalance(db, String(account.id));
+      ledgerMinor = balance.ledgerMinor;
+      heldMinor = balance.heldMinor;
+    } catch {
+      // A missing ledger row should not break the customer view.
+    }
+    return { ...account, ledgerMinor, heldMinor, availableMinor: ledgerMinor - heldMinor };
+  });
   const cases = db
     .prepare("SELECT * FROM compliance_cases WHERE subject_type = 'user' AND subject_id = ? ORDER BY created_at DESC")
     .all(userId);
@@ -367,6 +380,7 @@ export function runReconciliation(db: Database.Database, actor: SessionUser): { 
       );
       for (const row of rows.filter((r) => r.currency === currency && r.provider_minor !== r.ledger_minor)) {
         itemCount += 1;
+        exceptions += 1;
         insertItem.run(
           newId("rec"),
           runId,
@@ -640,6 +654,65 @@ export function listSupportTickets(db: Database.Database) {
     .all() as Array<Record<string, unknown>>;
 }
 
+export function updateSupportTicket(
+  db: Database.Database,
+  actor: SessionUser,
+  input: { ticketId: string; status: "open" | "pending" | "resolved"; priority: "low" | "normal" | "high" },
+): void {
+  assertOps(actor, "ops:read");
+  writeTransaction(db, () => {
+    const ticket = db.prepare("SELECT id, status, priority FROM support_tickets WHERE id = ?").get(input.ticketId) as
+      | { id: string; status: string; priority: string }
+      | undefined;
+    if (!ticket) throw new DomainError("NOT_FOUND", "Support ticket not found");
+    db.prepare(
+      "UPDATE support_tickets SET status = ?, priority = ?, assignee_id = ?, updated_at = ? WHERE id = ?",
+    ).run(input.status, input.priority, actor.id, new Date().toISOString(), input.ticketId);
+    recordAudit(db, {
+      actorId: actor.id,
+      actorRole: actor.platformRole,
+      action: "support.ticket_updated",
+      resourceType: "support_ticket",
+      resourceId: input.ticketId,
+      metadata: { from: ticket.status, to: input.status, priority: input.priority },
+    });
+  });
+}
+
+export function resolveReconciliationItem(
+  db: Database.Database,
+  actor: SessionUser,
+  input: { itemId: string; status: "investigating" | "resolved"; note: string },
+): void {
+  assertOps(actor, "ops:reconcile");
+  if (!input.note.trim()) throw new DomainError("VALIDATION_ERROR", "Document the reconciliation decision");
+  writeTransaction(db, () => {
+    const item = db.prepare("SELECT id, run_id FROM reconciliation_items WHERE id = ?").get(input.itemId) as
+      | { id: string; run_id: string }
+      | undefined;
+    if (!item) throw new DomainError("NOT_FOUND", "Reconciliation item not found");
+    db.prepare("UPDATE reconciliation_items SET status = ?, note = ? WHERE id = ?").run(
+      input.status,
+      input.note.trim(),
+      input.itemId,
+    );
+    const open = db
+      .prepare(
+        "SELECT COUNT(*) AS count FROM reconciliation_items WHERE run_id = ? AND status IN ('exception','investigating')",
+      )
+      .get(item.run_id) as { count: number };
+    db.prepare("UPDATE reconciliation_runs SET exception_count = ? WHERE id = ?").run(open.count, item.run_id);
+    recordAudit(db, {
+      actorId: actor.id,
+      actorRole: actor.platformRole,
+      action: `reconciliation.${input.status}`,
+      resourceType: "reconciliation_item",
+      resourceId: input.itemId,
+      metadata: { note: input.note, remainingExceptions: open.count },
+    });
+  });
+}
+
 export function listProviderEvents(db: Database.Database) {
   return db
     .prepare(
@@ -748,8 +821,22 @@ export function postAdjustment(
   input: { accountId: string; amountMinor: number; currency: string; reason: string },
 ): void {
   assertOps(actor, "ops:ledger");
+  if (!input.reason.trim()) throw new DomainError("VALIDATION_ERROR", "A reason is required");
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor === 0) {
+    throw new DomainError("VALIDATION_ERROR", "Adjustment amount must be a non-zero integer in minor units");
+  }
+  const account = db.prepare("SELECT id, currency FROM accounts WHERE id = ?").get(input.accountId) as
+    | { id: string; currency: string }
+    | undefined;
+  if (!account) throw new DomainError("NOT_FOUND", "Account not found");
+  if (account.currency !== input.currency) {
+    throw new DomainError("VALIDATION_ERROR", "Adjustment currency must match the account currency");
+  }
+  const balance = accountBalance(db, input.accountId);
+  if (input.amountMinor > 0 && balance.availableMinor < input.amountMinor) {
+    throw new DomainError("INSUFFICIENT_FUNDS", "A debit adjustment cannot exceed the available balance");
+  }
   writeTransaction(db, () => {
-    if (!input.reason.trim()) throw new DomainError("VALIDATION_ERROR", "A reason is required");
     const journal = postJournal(db, {
       description: `Controlled adjustment — ${input.reason}`,
       kind: "adjustment",
