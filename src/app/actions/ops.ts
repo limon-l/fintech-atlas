@@ -12,6 +12,7 @@ import {
   reverseJournalByOps,
   runReconciliation,
   settlePayoutByOps,
+  failPayoutByOps,
   updateComplianceCase,
   updateRiskEvent,
   updateSupportTicket,
@@ -235,6 +236,24 @@ export async function settlePayoutAction(
 /* -------------------------------------------------------------------------- */
 /* Integrations                                                               */
 /* -------------------------------------------------------------------------- */
+
+export async function failPayoutAction(
+  _previous: OpsActionState,
+  formData: FormData,
+): Promise<OpsActionState> {
+  const actor = await requireOps("ops:ledger");
+  try {
+    const pinError = await authorizePin(actor.id, text(formData, "pin"));
+    if (pinError) return { error: pinError };
+    const transferId = text(formData, "transferId");
+    failPayoutByOps(getDb(), actor, transferId, text(formData, "reason"));
+    revalidateOps("/ops/integrations", "/ops/audit");
+    revalidatePath("/app", "layout");
+    return { ok: true, message: "Payout failed and held funds were released." };
+  } catch (error) {
+    return failure(error);
+  }
+}
 
 export async function replayWebhookAction(
   _previous: OpsActionState,

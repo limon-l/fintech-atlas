@@ -31,7 +31,7 @@ This is the honest remaining-work list for the sandbox. Items marked **blocked**
 | Multiprocess concurrency test | The ledger uses immediate transactions, but only one process is exercised | Not tested |
 | Full RBAC exercise | The matrix is unit-tested; every page/action combination is not | Partial |
 | Transfer cancellation | Processing transfers can be settled but not canceled through the UI | Not implemented |
-| External payout failure flow | A failure path releases holds in the service; no operator UI drives it | Partial |
+| External payout failure flow | Operations form requires PIN and a reason; failure releases the hold with audit and notification | Implemented; browser verification pending |
 | Reconciliation offset cases | Currency and per-transfer differences are counted; offsetting provider discrepancies need dedicated tests | Partial |
 | Approval edge cases | Role order, self-approval, PIN and comments are tested; delegation and re-submission are not | Partial |
 | Audit export | The audit trail is readable in the UI; there is no CSV/JSON export | Not implemented |

@@ -4,7 +4,7 @@ import { requireOps } from "@/lib/auth";
 import { listProcessingTransfers, listProviderEvents, listWebhooks } from "@/server/ops";
 import { PageHeader, SandboxNote, Panel, Stat, EmptyState, Disclosure } from "@/components/ui/misc";
 import { Badge, StatusPill } from "@/components/ui/badge";
-import { SettlePayoutForm, WebhookReplayButton } from "@/components/app/ops-forms";
+import { FailPayoutForm, SettlePayoutForm, WebhookReplayButton } from "@/components/app/ops-forms";
 import { formatDateTime, relativeTime, safeJson } from "@/lib/utils";
 
 export const metadata = { title: "Integrations" };
@@ -71,7 +71,7 @@ export default async function OpsIntegrationsPage() {
         action={<Badge variant={processing.length > 0 ? "warning" : "success"}>{processing.length} awaiting</Badge>}
       >
         {processing.length === 0 ? (
-          <EmptyState title="No processing payouts" description="Every external transfer has settled." />
+          <EmptyState title="No processing payouts" description="No external transfers are awaiting a decision." />
         ) : (
           <div className="space-y-2">
             {processing.map((transfer) => (
@@ -95,6 +95,7 @@ export default async function OpsIntegrationsPage() {
                 </div>
                 <div className="mt-2 border-t border-border/70 pt-2">
                   <SettlePayoutForm transferId={transfer.id} reference={transfer.reference} />
+                  <FailPayoutForm transferId={transfer.id} reference={transfer.reference} />
                 </div>
               </div>
             ))}

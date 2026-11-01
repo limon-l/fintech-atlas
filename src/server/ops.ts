@@ -5,7 +5,7 @@ import { canPlatform, type Permission } from "@/domain/rbac";
 import { accountBalance, postJournal, recordAudit, reverseJournal, writeTransaction } from "@/domain/ledger";
 import { newId, reference } from "@/lib/utils";
 import { randomToken, sha256 } from "@/lib/password";
-import { settleTransfer } from "./transfers";
+import { failTransfer, settleTransfer } from "./transfers";
 
 function assertOps(user: SessionUser, permission: Permission): void {
   if (!canPlatform(user.platformRole, permission)) {
@@ -754,6 +754,20 @@ export function settlePayoutByOps(
 ): void {
   assertOps(actor, "ops:ledger");
   settleTransfer(db, transferId, actor);
+}
+
+export function failPayoutByOps(
+  db: Database.Database,
+  actor: SessionUser,
+  transferId: string,
+  reason: string,
+): void {
+  assertOps(actor, "ops:ledger");
+  const note = reason.trim();
+  if (note.length < 5 || note.length > 500) {
+    throw new DomainError("VALIDATION_ERROR", "Enter a failure reason between 5 and 500 characters.");
+  }
+  failTransfer(db, transferId, actor, note);
 }
 
 export function listWebhooks(db: Database.Database) {

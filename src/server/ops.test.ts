@@ -14,6 +14,7 @@ import {
   reverseJournalByOps,
   runReconciliation,
   settlePayoutByOps,
+  failPayoutByOps,
   updateComplianceCase,
   updateRiskEvent,
   updateSupportTicket,
@@ -184,6 +185,29 @@ describe("ledger controls", () => {
 });
 
 describe("payout settlement", () => {
+  it("releases a failed payout hold without posting money and records the reason", () => {
+    const transferId = "trf_maya_gbp_pending";
+    const before = accountBalance(db, "acc_maya_gbp");
+    expect(() => failPayoutByOps(db, support, transferId, "Provider rejects payout")).toThrow(/permission/i);
+    expect(() => failPayoutByOps(db, admin, transferId, " ")).toThrow(/reason/i);
+    expect(accountBalance(db, "acc_maya_gbp")).toEqual(before);
+    failPayoutByOps(db, admin, transferId, " Provider rejects payout ");
+    const row = db.prepare("SELECT status, failure_reason, journal_id, hold_id FROM transfers WHERE id = ?").get(transferId) as {
+      status: string; failure_reason: string; journal_id: string | null; hold_id: string;
+    };
+    expect(row.status).toBe("failed");
+    expect(row.failure_reason).toBe("Provider rejects payout");
+    expect(row.journal_id).toBeNull();
+    expect(db.prepare("SELECT status FROM holds WHERE id = ?").get(row.hold_id)).toEqual({ status: "released" });
+    const after = accountBalance(db, "acc_maya_gbp");
+    expect(after.ledgerMinor).toBe(before.ledgerMinor);
+    expect(after.availableMinor).toBeGreaterThan(before.availableMinor);
+    expect(listAudit(db, { action: "transfer.failed" })).toHaveLength(1);
+    expect(() => settlePayoutByOps(db, admin, transferId)).toThrow(/processing/i);
+    expect(() => failPayoutByOps(db, admin, transferId, "Provider rejects payout")).toThrow(/current state/i);
+    expect(accountBalance(db, "acc_maya_gbp")).toEqual(after);
+  });
+
   it("requires ledger authority and settles a processing payout once", () => {
     expect(() => settlePayoutByOps(db, support, "trf_maya_gbp_pending")).toThrow(/permission/i);
     settlePayoutByOps(db, admin, "trf_maya_gbp_pending");

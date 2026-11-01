@@ -12,6 +12,7 @@ import {
   reviewRiskAction,
   runReconciliationAction,
   settlePayoutAction,
+  failPayoutAction,
   updateSupportTicketAction,
   type OpsActionState,
 } from "@/app/actions/ops";
@@ -268,6 +269,26 @@ export function SettlePayoutForm({ transferId, reference }: { transferId: string
       <div className="w-full">
         <FormError message={state.error} />
       </div>
+    </form>
+  );
+}
+
+export function FailPayoutForm({ transferId, reference }: { transferId: string; reference: string }) {
+  const [state, action] = useActionState(failPayoutAction, initial);
+  useOpsToast(state);
+  return (
+    <form action={action} className="mt-3 flex flex-wrap items-end gap-2" onSubmit={(event) => {
+      if (!window.confirm(`Fail ${reference} and release its held funds?`)) event.preventDefault();
+    }}>
+      <input type="hidden" name="transferId" value={transferId} />
+      <Field label="Failure reason" htmlFor={`fail-reason-${transferId}`}>
+        <Input id={`fail-reason-${transferId}`} name="reason" required minLength={5} maxLength={500} />
+      </Field>
+      <Field label="Authorization PIN" htmlFor={`fail-pin-${transferId}`}>
+        <Input id={`fail-pin-${transferId}`} name="pin" type="password" inputMode="numeric" autoComplete="off" required maxLength={6} className="w-36" />
+      </Field>
+      <SubmitButton size="sm" variant="danger" pendingLabel="Releasing funds…">Fail payout</SubmitButton>
+      <div className="w-full"><FormError message={state.error} /></div>
     </form>
   );
 }
