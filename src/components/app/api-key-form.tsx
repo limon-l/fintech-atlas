@@ -61,13 +61,21 @@ export function ApiKeyForm() {
   );
 }
 
-export function RevokeKeyButton({ keyId, name }: { keyId: string; name: string }) {
+export function RevokeKeyButton({ keyId, name, revoked }: { keyId: string; name: string; revoked?: boolean }) {
   const [state, action] = useActionState(revokeApiKeyAction, initial);
 
   useEffect(() => {
     if (state.message) toast.success(state.message);
     if (state.error) toast.error(state.error);
   }, [state]);
+
+  if (revoked) {
+    return (
+      <Button type="button" variant="ghost" size="sm" disabled>
+        Revoked
+      </Button>
+    );
+  }
 
   return (
     <form

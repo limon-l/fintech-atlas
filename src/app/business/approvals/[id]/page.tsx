@@ -126,21 +126,17 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
 
         <div className="space-y-4">
           <Panel title="Decision" description="Step-up PIN required">
-            {request.status !== "pending" ? (
-              <div className="rounded-[10px] border border-border bg-surface-2/50 px-3 py-6 text-center">
-                <StatusPill status={request.status} />
-                <p className="mt-2 text-[11px] text-muted">This request has already been decided.</p>
+            {request.status === "pending" && reason ? (
+              <div className="mb-3 rounded-[9px] border border-warning/25 bg-warning-soft px-3 py-2 text-[10.5px] leading-relaxed text-warning">
+                {reason}
               </div>
-            ) : (
-              <>
-                {reason ? (
-                  <div className="mb-3 rounded-[9px] border border-warning/25 bg-warning-soft px-3 py-2 text-[10.5px] leading-relaxed text-warning">
-                    {reason}
-                  </div>
-                ) : null}
-                <ApprovalDecisionForm approvalId={request.id} disabled={!canDecide} />
-              </>
-            )}
+            ) : null}
+            <ApprovalDecisionForm
+              approvalId={request.id}
+              disabled={!canDecide}
+              decided={request.status !== "pending"}
+              status={request.status}
+            />
           </Panel>
 
           <Panel title="Guardrails" description="Why this cannot be bypassed">

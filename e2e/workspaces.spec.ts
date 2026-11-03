@@ -107,3 +107,115 @@ test("operations pages render for staff and reject a customer", async ({ page })
   await expect(page).toHaveURL(/\/app\?denied=ops$/);
 });
 
+test("personal transfer posts a receipt", async ({ page }) => {
+  await login(page);
+  await page.goto("/app/transfers/new");
+  await page.getByLabel("Amount (USD)").fill("12.34");
+  await page.getByLabel("Authorization PIN").fill("246810");
+  await page.getByRole("button", { name: "Authorize transfer", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/transfers\/trf_/);
+  await expect(page.locator("h1")).toHaveText(/^TRF-/);
+  await expect(page.getByText("Posted", { exact: true }).first()).toBeVisible();
+});
+
+test("fx quote converts between wallets", async ({ page }) => {
+  await login(page);
+  await page.goto("/app/fx");
+  await page.getByLabel("You convert (USD)").fill("25");
+  await page.getByRole("button", { name: "Get quote", exact: true }).click();
+  await expect(page.getByText(/Quote fxq_/)).toBeVisible();
+  await page.getByLabel("Authorization PIN").fill("246810");
+  await page.getByRole("button", { name: /Convert USD/ }).click();
+  await expect(page).toHaveURL(/\/app\/transfers\/trf_/);
+  await expect(page.locator("h1")).toHaveText(/^TRF-/);
+});
+
+test("maker-checker approval moves through both roles", async ({ page, context }) => {
+  await login(page, "leo@atlas.demo", "/business/approvals/apr_1");
+  await page.getByLabel("Decision comment").fill("Receipt matches the expense claim.");
+  await page.getByLabel("Authorization PIN").fill("246810");
+  await page.getByRole("button", { name: "Approve step", exact: true }).click();
+  await expect(page.getByText("Approval recorded.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Step 2 · finance manager", { exact: true })).toBeVisible();
+
+  await context.clearCookies();
+  await login(page, "priya@atlas.demo", "/business/approvals/apr_1");
+  await page.getByLabel("Decision comment").fill("Budget available; approved for reimbursement.");
+  await page.getByLabel("Authorization PIN").fill("246810");
+  await page.getByRole("button", { name: "Approve step", exact: true }).click();
+  await expect(page.getByText("Approval recorded.", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Approved", { exact: true }).first()).toBeVisible();
+});
+
+test("developer key can be created and revoked", async ({ page }) => {
+  await login(page, "jonas@atlas.demo", "/business/developers");
+  await page.getByRole("button", { name: "Create API key", exact: true }).click();
+  await page.getByLabel("Key name").fill("E2E service key");
+  await page.getByRole("button", { name: "Create", exact: true }).click();
+  await expect(
+    page.getByText("API key created. Copy it now — it is shown only once.", { exact: true }),
+  ).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Revoke", exact: true }).first().click();
+  await expect(
+    page.getByText("API key revoked. Requests using it now fail.", { exact: true }),
+  ).toBeVisible();
+});
+
+test("external payout settles and operations decisions persist", async ({ page, context }) => {
+  await login(page);
+  await page.goto("/app/transfers/new");
+  await page.getByLabel("From").selectOption("acc_maya_gbp");
+  await page.getByRole("button", { name: /External payout/ }).click();
+  await page.getByLabel("Beneficiary").selectOption("ben_kwame");
+  await page.getByLabel("Amount (GBP)").fill("5.00");
+  await page.getByLabel("Authorization PIN").fill("246810");
+  await page.getByRole("button", { name: "Authorize transfer", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/transfers\/trf_/);
+  await expect(page.getByText("Processing", { exact: true }).first()).toBeVisible();
+
+  await context.clearCookies();
+  await login(page, "admin@atlas.demo", "/ops/integrations");
+  const settleForm = page
+    .locator("form")
+    .filter({ has: page.getByRole("button", { name: "Settle payout", exact: true }) })
+    .first();
+  await settleForm.getByLabel("Authorization PIN").fill("246810");
+  page.once("dialog", (dialog) => dialog.accept());
+  await settleForm.getByRole("button", { name: "Settle payout", exact: true }).click();
+  await expect(
+    page.getByText("Simulated settlement posted and the hold was captured.", { exact: true }),
+  ).toBeVisible();
+
+  await page.goto("/ops/reconciliation");
+  await page.getByRole("button", { name: "Run sandbox reconciliation", exact: true }).click();
+  await expect(page.getByText(/Reconciliation completed with/)).toBeVisible();
+
+  await page.goto("/ops/risk");
+  const riskDetails = page
+    .locator("details")
+    .filter({ hasText: "Record a review decision" })
+    .first();
+  await riskDetails.locator("summary").click();
+  const riskForm = riskDetails.locator("form");
+  await riskForm.getByLabel("Outcome").selectOption("cleared");
+  await riskForm.getByLabel("Review note").fill("Checked the velocity signal against the customer's history.");
+  await riskForm.getByLabel("Authorization PIN").fill("246810");
+  await riskForm.getByRole("button", { name: "Record decision", exact: true }).click();
+  await expect(page.getByText("Risk event marked cleared.", { exact: true })).toBeVisible();
+
+  await page.goto("/ops/support");
+  const ticketForm = page
+    .locator("form")
+    .filter({ has: page.getByRole("button", { name: "Update ticket", exact: true }) })
+    .first();
+  await ticketForm.getByRole("button", { name: "Update ticket", exact: true }).click();
+  await expect(page.getByText("Support ticket updated.", { exact: true })).toBeVisible();
+
+  await page.goto("/ops/integrations");
+  await page.getByRole("button", { name: /Replay|Retry/ }).first().click();
+  await expect(page.getByText("Webhook delivery replayed.", { exact: true })).toBeVisible();
+});
+
+

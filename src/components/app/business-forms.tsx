@@ -19,6 +19,7 @@ import {
   type BusinessActionState,
 } from "@/app/actions/business";
 import { Button } from "@/components/ui/button";
+import { StatusPill } from "@/components/ui/badge";
 import { Field, FormError, Input, Select, Textarea } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { CURRENCY_CODES } from "@/domain/money";
@@ -342,10 +343,28 @@ export function ExpenseReimburseForm({ expense, accounts }: { expense: { id: str
 /* Approvals                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function ApprovalDecisionForm({ approvalId, disabled }: { approvalId: string; disabled?: boolean }) {
+export function ApprovalDecisionForm({
+  approvalId,
+  disabled,
+  decided,
+  status,
+}: {
+  approvalId: string;
+  disabled?: boolean;
+  decided?: boolean;
+  status?: string;
+}) {
   const [state, action] = useActionState(decideApprovalAction, initial);
   const [decision, setDecision] = useState<"approve" | "reject">("approve");
   useFeedback(state);
+  if (decided) {
+    return (
+      <div className="rounded-[10px] border border-border bg-surface-2/50 px-3 py-6 text-center">
+        <StatusPill status={status ?? "approved"} />
+        <p className="mt-2 text-[11px] text-muted">This request has already been decided.</p>
+      </div>
+    );
+  }
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="approvalId" value={approvalId} />

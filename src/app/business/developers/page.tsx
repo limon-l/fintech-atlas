@@ -50,7 +50,7 @@ export default async function BusinessDevelopersPage() {
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{key.environment}</Badge>
                       {key.revoked_at ? <StatusPill status="canceled" /> : <StatusPill status="active" />}
-                      {key.revoked_at ? null : <RevokeKeyButton keyId={key.id} name={key.name} />}
+                      <RevokeKeyButton keyId={key.id} name={key.name} revoked={Boolean(key.revoked_at)} />
                     </div>
                   </div>
                   <p className="mt-1 text-[9px] text-subtle">

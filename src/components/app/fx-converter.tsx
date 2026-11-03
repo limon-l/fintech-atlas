@@ -17,10 +17,12 @@ import { cn } from "@/lib/utils";
 export function FxConverter({ accounts }: { accounts: AccountView[] }) {
   const router = useRouter();
   const active = accounts.filter((account) => account.status === "active");
-  const [sourceId, setSourceId] = useState(active[0]?.id ?? "");
-  const [destinationId, setDestinationId] = useState(
-    active.find((account) => account.id !== active[0]?.id)?.id ?? "",
+  const initialSource = active[0];
+  const initialDestination = active.find(
+    (account) => account.id !== initialSource?.id && account.currency !== initialSource?.currency,
   );
+  const [sourceId, setSourceId] = useState(initialSource?.id ?? "");
+  const [destinationId, setDestinationId] = useState(initialDestination?.id ?? "");
   const [amount, setAmount] = useState("");
   const [quote, setQuote] = useState<CreateQuoteResult | null>(null);
   const [pin, setPin] = useState("");
