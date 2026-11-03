@@ -1,6 +1,6 @@
 # Implementation report
 
-Date: 2026-11-01. This report describes the code that exists in the repository. It separates tested behavior from sandbox limitations.
+Date: 2026-11-03. This report describes the code that exists in the repository. It separates tested behavior from sandbox limitations.
 
 ## Current system
 
@@ -104,6 +104,7 @@ npm run typecheck   pass
 npm test            57 tests across 6 files, all pass
 npm run build       pass
 npm run lint        pass with 0 errors and 0 warnings
+npm run test:e2e    10 Chromium tests, all pass
 ```
 
 Test files:
@@ -121,7 +122,9 @@ Test files:
 
 - Operations can fail a processing payout with a PIN and a 5–500 character reason. The hold is released, the failure is audited, and customer notifications are persisted. Regression tests reject unauthorized calls and repeated state transitions and confirm the ledger balance remains unchanged.
 - Logout clears both session and organization cookies. Shared submit buttons preserve the disabled state while a form is pending, including when callers supply a disabled prop.
-- Production HTTP smoke checks pass for seven public pages, three protected workspace redirects and an unauthenticated API request (401). These checks do not exercise browser clicks or form submissions.
+- Production HTTP smoke checks pass for public pages, protected workspace redirects and an unauthenticated API request (401). Route, action and component audits report 86/86, 38/38 and 37/37 respectively.
+- Ten Chromium E2E tests exercise login/logout, session revocation, every workspace route, account ownership, card controls, personal transfers, FX conversion, maker-checker approvals, developer-key creation/revocation, external payout settlement, reconciliation, risk decisions, support updates and webhook replay against a production server with an isolated temporary database.
+- The deployed Vercel build serves the marketing pages, sign-in, docs and the read-only API. `GET /api/v1/accounts?org_id=org_northwind` returns seeded organization accounts with `200`.
 
 Known non-fatal advisories:
 
@@ -130,14 +133,15 @@ Known non-fatal advisories:
 
 ## Runtime verification
 
-An authenticated production server was exercised during development:
+An authenticated production server was exercised during development and the Vercel deployment was probed:
 
 - All 13 operations routes returned HTTP 200 with an admin session.
 - A journal detail page rendered its postings.
 - Unauthenticated operations routes redirected to sign-in.
 - The API returned structured `401` responses without a key.
+- The deployed API returned seeded organization accounts with `200`.
 
-Five Chromium E2E tests cover login/logout, session revocation, 31 workspace subroutes, all five personal account detail pages, account ownership checks, card freeze/limits and payout failure. They use an isolated temporary database and the production server. Other mutations, accessibility, visual regression and performance checks remain outstanding. See `docs/RELEASE.md` for the current quality matrix.
+Ten Chromium E2E tests cover login/logout, session revocation, 31 workspace subroutes, all five personal account detail pages, account ownership checks, card freeze/limits, personal transfer, FX conversion, maker-checker approval, developer key creation/revocation, payout failure, payout settlement, reconciliation, risk and support decisions, and webhook replay. They use an isolated temporary database and the production server. Accessibility, visual regression, performance and exhaustive form coverage remain outstanding. See `docs/RELEASE.md` for the current quality matrix.
 
 ## Security model
 
@@ -158,7 +162,7 @@ Five Chromium E2E tests cover login/logout, session revocation, 31 workspace sub
 - No real KYC, card issuing, payment network or FX liquidity.
 - Partial Chromium E2E coverage; no a11y audit, visual regression or performance measurement.
 - No independent security review.
-- No production deployment, backup schedule or recovery drill.
+- The Vercel deployment is a sandbox: SQLite falls back to ephemeral `/tmp`, so writes are per-instance and reset when the instance is replaced. There is no scheduled backup or recovery drill.
 - The v1 API is read-only by design.
 
 ## Non-claims

@@ -35,7 +35,7 @@ The UI never calculates a financial write. It submits validated form data to a s
 
 ## Persistence
 
-SQLite is used because the target environment has no Docker or PostgreSQL service. The database file lives at `data/atlas.db` by default and can be overridden with `DATABASE_PATH`.
+SQLite is used because the target environment has no Docker or PostgreSQL service. The database file lives at `data/atlas.db` by default and can be overridden with `DATABASE_PATH`. On Vercel the runtime falls back to `/tmp/atlas.db` because the deployment filesystem is read-only; that path is ephemeral and per-instance.
 
 Migrations are applied on first database access. The seed is deterministic and only runs when the `users` table is empty. This keeps local setup zero-step while avoiding accidental reseeding of an existing database.
 
@@ -44,7 +44,7 @@ Key tables:
 - `users`, `sessions`, `memberships`, `organizations`
 - `accounts`, `ledger_accounts`, `journal_entries`, `postings`
 - `transfers`, `holds`, `beneficiaries`, `fx_quotes`, `idempotency_keys`
-- `invoices`, `invoice_lines`, `invoice_payments`, `bills`, `vendors`, `expenses`
+- `invoices`, `invoice_lines`, `bills`, `vendors`, `expenses`
 - `approval_requests`, `approval_steps`
 - `risk_events`, `compliance_cases`, `reconciliation_runs`, `reconciliation_items`
 - `provider_events`, `webhook_events`, `audit_events`, `support_tickets`
@@ -113,7 +113,8 @@ Reconciliation compares posted external payouts with synthetic provider settleme
 - Rate limiting is process-local.
 - Webhook rows are a local queue, not a reliable delivery service. Replay is simulated.
 - Provider events are synthetic.
-- There is no backup, recovery drill, telemetry pipeline or deployment verification.
+- On Vercel, SQLite writes use ephemeral `/tmp`; data is per-instance and not durable across deployments or cold starts.
+- There is no backup schedule, recovery drill or telemetry pipeline.
 - The read API is intentionally incomplete for financial writes.
 
 ## PostgreSQL migration path
@@ -136,6 +137,10 @@ npm run typecheck
 npm test
 npm run build
 npm run lint
+npm run test:e2e
+node scripts/audit-routes.mjs
+node scripts/audit-actions.mjs
+node scripts/audit-components.mjs
 ```
 
-The test suite covers money precision, journal balancing, transfer idempotency, holds, settlement, FX quotes, reversals, reconciliation, operations permissions and API authentication.
+The unit suite covers money precision, journal balancing, transfer idempotency, holds, settlement, FX quotes, reversals, reconciliation, operations permissions and API authentication. The Chromium suite covers login/logout, workspace routes, ownership checks, card controls, personal transfers, FX conversion, maker-checker approvals, developer keys, payout failure/settlement and operations decisions. The audit scripts check route reachability, server-action wiring and component usage.

@@ -1,6 +1,6 @@
 # Release QA report
 
-Date: 2026-11-01. Scope: the complete local sandbox currently in the repository. This report records what was executed and observed. It is not a production-readiness certification.
+Date: 2026-11-03. Scope: the complete sandbox currently in the repository and the Vercel deployment. This report records what was executed and observed. It is not a production-readiness certification.
 
 ## Executive summary
 
@@ -11,7 +11,7 @@ ATLAS now covers four surfaces around one ledger:
 3. **Business** finance with organization roles, maker-checker approvals and developer keys.
 4. **Operations** with customers, support, risk, compliance, reconciliation, ledger, audit, integrations, health and permissions.
 
-The build compiles, the test suite passes, lint is clean and an authenticated production server was exercised across the main routes. Chromium E2E covers login/logout, session revocation, workspace routes, card controls and payout failure. Remaining browser mutations, accessibility, visual-regression, performance and independent security testing remain outstanding.
+The build compiles, the unit suite passes, lint is clean and an authenticated production server was exercised across the main routes. Ten Chromium E2E tests cover login/logout, session revocation, every workspace route, account ownership, card controls, personal transfers, FX conversion, maker-checker approvals, developer-key creation/revocation, external payout settlement, reconciliation, risk decisions, support updates and webhook replay. The Vercel deployment serves public pages and the read-only API with seeded data. Accessibility, visual-regression, performance, multiprocess concurrency and independent security testing remain outstanding.
 
 ## Batch history
 
@@ -62,6 +62,10 @@ The build compiles, the test suite passes, lint is clean and an authenticated pr
 | `npm test` | **PASS** | 57 tests across 6 files |
 | `npm run build` | **PASS** | Optimized production build; all routes compiled |
 | `npm run lint` | **PASS** | 0 errors, 0 warnings |
+| `npm run test:e2e` | **PASS** | 10 Chromium tests against a production server and isolated temporary SQLite database |
+| `node scripts/audit-routes.mjs` | **PASS** | 86/86 public, protected, API and internal-link checks |
+| `node scripts/audit-actions.mjs` | **PASS** | 38/38 server actions referenced by UI or tests |
+| `node scripts/audit-components.mjs` | **PASS** | 37/37 component files imported somewhere |
 
 Known non-fatal advisories:
 
@@ -79,7 +83,7 @@ Known non-fatal advisories:
 
 ## Runtime smoke checks
 
-A production server was started with `npm start` and exercised with an authenticated admin session.
+A production server was started with `npm start` and exercised with an authenticated admin session, then the deployed Vercel build was probed.
 
 - Public pages `/`, `/pricing`, `/security`, `/developers`, `/login` return `200`.
 - `/docs` and all nine documentation slugs render `200`.
@@ -88,8 +92,10 @@ A production server was started with `npm start` and exercised with an authentic
 - Unauthenticated operations routes redirect to sign-in.
 - The API returns structured `401` responses without a key.
 - Organization switching and sign-out were exercised through the server actions.
+- The deployed `/api/v1/accounts?org_id=org_northwind` endpoint returns `200` with seeded organization accounts.
+- Ten Chromium E2E tests exercise the main browser mutations listed in the executive summary.
 
-These are HTTP and server-action checks, not a full browser workflow test. No screenshots, accessibility scores or performance traces were collected.
+These checks prove the wired paths, not exhaustive correctness. No screenshots, accessibility scores or performance traces were collected.
 
 ## Release quality matrix
 
@@ -106,9 +112,9 @@ PASS indicates only the stated evidence, never commercial readiness.
 | Financial transaction states | PASS | Processing hold, settlement, repeated settlement and reversal tests; all states not exhaustive |
 | FX calculations | PASS | Currency precision, deterministic conversion and expired quote tests |
 | Payment integrations | BLOCKED | No live provider configured or authorized |
-| Customer workspace | PARTIAL | Routes compile and render; browser interaction QA pending |
-| Business operations | PARTIAL | Routes compile and render; maker-checker tested; full browser workflow pending |
-| Risk/compliance workflows | PARTIAL | Guarded forms and service decisions tested; browser mutation tests pending |
+| Customer workspace | PASS | Routes render; browser transfer, FX conversion and card freeze/limit controls exercised |
+| Business operations | PASS | Routes render; browser maker-checker approval and API key create/revoke exercised |
+| Risk/compliance workflows | PARTIAL | Risk and support decisions exercised in Chromium; compliance decisions unit-tested only |
 | Reconciliation | PASS | Unauthorized caller rejected, authorized run persists, item resolution tested; offsetting discrepancies partial |
 | Payout settlement | PASS | Operations settlement posts, captures the hold and rejects repeats |
 | Responsive design | NOT TESTED | Responsive styles exist; no device/browser inspection |
@@ -117,7 +123,7 @@ PASS indicates only the stated evidence, never commercial readiness.
 | Automated tests | PASS | 57 tests in 6 suites, including authentication lifecycle and payout failure |
 | Performance | NOT TESTED | No Core Web Vitals, bundle or load measurements |
 | Security review | NOT TESTED | No independent audit or penetration test |
-| Deployment readiness | BLOCKED | Local build succeeds; hosting, secrets, recovery and release gates incomplete |
+| Deployment readiness | PARTIAL | Vercel build serves pages and the read-only API; SQLite uses ephemeral `/tmp` on Vercel, so writes are per-instance and not durable |
 | Documentation | PASS | Architecture, ledger, RBAC, design, blueprint, implementation, backlog, QA and portfolio recorded |
 
 ## Local recovery
@@ -126,7 +132,7 @@ Stop the server before copying files. `npm run db:reset` writes a timestamped `a
 
 ## Remaining issues
 
-- Partial Chromium E2E suite; no accessibility, visual-regression or performance suite.
+- Browser coverage is workflow-focused (10 Chromium tests), not exhaustive across every form, persona or viewport; no accessibility, visual-regression or performance suite.
 - No multiprocess concurrency or PostgreSQL isolation test.
 - Process-local rate limiting and sessions.
 - Synthetic providers, webhook deliveries and settlement only.

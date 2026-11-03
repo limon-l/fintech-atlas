@@ -24,14 +24,14 @@ This is the honest remaining-work list for the sandbox. Items marked **blocked**
 
 | Item | Why it matters | Current state |
 |---|---|---|
-| Browser E2E tests | Chromium covers login/logout, revoked sessions, workspace routes, card controls and payout failure | Partial; remaining mutations and other browsers pending |
+| Browser E2E tests | Chromium covers login/logout, revoked sessions, workspace routes, ownership, card controls, transfers, FX, approvals, developer keys, payout failure/settlement and operations decisions | Partial; exhaustive forms, other browsers and viewports pending |
 | Accessibility audit | Labels and focus styles exist; no axe/Lighthouse/screen-reader pass | Not tested |
 | Visual regression | Theme and responsive layouts have no screenshot baseline | Not implemented |
 | Performance measurement | No Core Web Vitals, bundle or database timing data | Not tested |
 | Multiprocess concurrency test | The ledger uses immediate transactions, but only one process is exercised | Not tested |
 | Full RBAC exercise | The matrix is unit-tested; every page/action combination is not | Partial |
 | Transfer cancellation | Processing transfers can be settled but not canceled through the UI | Not implemented |
-| External payout failure flow | Operations form requires PIN and a reason; failure releases the hold with audit and notification | Implemented; browser verification pending |
+| External payout failure flow | Operations form requires PIN and a reason; failure releases the hold with audit and notification | Implemented and browser-verified |
 | Reconciliation offset cases | Currency and per-transfer differences are counted; offsetting provider discrepancies need dedicated tests | Partial |
 | Approval edge cases | Role order, self-approval, PIN and comments are tested; delegation and re-submission are not | Partial |
 | Audit export | The audit trail is readable in the UI; there is no CSV/JSON export | Not implemented |
@@ -47,7 +47,7 @@ This is the honest remaining-work list for the sandbox. Items marked **blocked**
 | Multi-entity consolidation | One seeded organization only |
 | Notifications preferences | Notifications are persisted, but delivery channels are not configurable |
 | Internationalization | Copy and currency formatting are English-first |
-| Marketing claim audit | Links and copy have been reviewed, but no automated link checker runs in CI |
+| Marketing claim audit | Links and copy have been reviewed; local route, action and component audit scripts run, but no automated link checker runs in CI |
 | Storybook or component catalog | The design system is documented in markdown, not interactive |
 
 ## Completed in the current build
@@ -63,6 +63,9 @@ This is the honest remaining-work list for the sandbox. Items marked **blocked**
 - Read-only bearer API with hashed keys, revocation and structured errors.
 - Rendered documentation at `/docs`.
 - Unit and integration tests for financial invariants, operations permissions, approvals, FX and API boundaries.
+- Ten Chromium E2E tests for the main signed-in workflows.
+- Local route, server-action and component audit scripts.
+- Vercel deployment of the sandbox with the read-only API backed by seeded data.
 
 ## Release gate
 
