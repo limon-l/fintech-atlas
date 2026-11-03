@@ -7,7 +7,6 @@ import { DomainError } from "@/domain/errors";
 import { parseMoneyToMinor } from "@/domain/money";
 import { sha256 } from "@/lib/password";
 import { createQuote, createTransfer, type CreateQuoteResult } from "@/server/transfers";
-import { newId } from "@/lib/utils";
 
 export interface ActionResult<T = undefined> {
   ok: boolean;
@@ -142,8 +141,4 @@ export async function createBeneficiaryAction(input: {
   } catch (error) {
     return failure(error);
   }
-}
-
-export async function newIdempotencyKeyAction(): Promise<string> {
-  return newId("idm");
 }

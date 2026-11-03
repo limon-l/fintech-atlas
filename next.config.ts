@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
+  // The migration runner reads SQL at runtime, so make sure the files are
+  // traced into serverless bundles (Vercel included).
+  outputFileTracingIncludes: {
+    "/*": ["./src/db/migrations/**/*.sql"],
+  },
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts", "date-fns"],
   },

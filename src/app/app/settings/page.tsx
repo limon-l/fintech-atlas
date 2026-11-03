@@ -3,7 +3,7 @@ import { Bell, KeyRound, LifeBuoy, ShieldCheck, Smartphone, UserRound } from "lu
 import { getDb } from "@/db/client";
 import { requireUser } from "@/lib/auth";
 import { notificationsForUser, unreadNotificationCount } from "@/server/personal";
-import { markAllNotificationsReadAction } from "@/app/actions/personal";
+import { markAllNotificationsReadAction, markNotificationReadAction } from "@/app/actions/personal";
 import { PageHeader, SandboxNote, Panel, Disclosure, KeyValue, EmptyState } from "@/components/ui/misc";
 import { Badge, StatusPill } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,6 +102,12 @@ export default async function SettingsPage() {
                   <div className="mt-1.5 flex items-center gap-2 text-[9px] text-subtle">
                     <span>{relativeTime(notification.createdAt)}</span>
                     {notification.href ? <Link href={notification.href} className="font-semibold text-primary hover:underline">Open</Link> : null}
+                    {notification.readAt ? null : (
+                      <form action={markNotificationReadAction}>
+                        <input type="hidden" name="id" value={notification.id} />
+                        <button type="submit" className="font-semibold text-primary hover:underline">Mark read</button>
+                      </form>
+                    )}
                   </div>
                 </div>
               ))}
