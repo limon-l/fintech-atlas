@@ -604,9 +604,9 @@ curl -s "https://fintech-atlas-omega.vercel.app/api/v1/accounts?org_id=org_north
       "name": "Tax reserve",
       "currency": "USD",
       "status": "active",
-      "balance_minor": 2184000,
+      "balance_minor": 1800000,
       "held_minor": 0,
-      "available_minor": 2184000
+      "available_minor": 1800000
     },
     {
       "id": "acc_northwind_eur",
@@ -629,6 +629,8 @@ curl -s "https://fintech-atlas-omega.vercel.app/api/v1/accounts?org_id=org_north
 ```
 
 ### Example: recent transactions
+
+> The transaction IDs, relative dates, and ordering below are illustrative. A fresh seed generates new IDs and relative timestamps; the response shape and field names are stable.
 
 ```bash
 curl -s "http://localhost:3000/api/v1/transactions?account_id=acc_maya_usd&limit=2" \
